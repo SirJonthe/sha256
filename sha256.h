@@ -64,19 +64,19 @@ private:
 	uint32_t majority(uint32_t x, uint32_t y, uint32_t z) const;
 	// blit
 	// Bit-block transfer of 64 bytes from 'src' to 'dst'.
-	void     blit(const char *src, uint8_t *dst) const;
+	void blit(const char *src, uint8_t *dst) const;
 	// blit
 	// Bit-block transfer of 'num' bytes from 'src' to 'dst'. Fills remaining 64-'num' bytes in 'dst' with zero-value.
-	void     blit(const char *src, uint8_t *dst, uint32_t num) const;
+	void blit(const char *src, uint8_t *dst, uint32_t num) const;
 	// create_schedule
 	// Fills a message schedule with the contents from 'block' and calculates the remaining 48 words in the schedule.
-	void     create_schedule(const uint8_t *block, schedule_t &schedule) const;
+	void create_schedule(const uint8_t *block, schedule_t &schedule) const;
 	// process_block
 	// Processes a single message data block and transforms the digest values in 'X'.
-	void     process_block(const uint8_t *block, uint32_t *X) const;
+	void process_block(const uint8_t *block, uint32_t *X) const;
 	// convert_digest_endian
 	// Converts bytes in digest to final endian and outputs them to 'digest'.
-	void     convert_digest_endian(uint8_t *out) const;
+	const uint8_t *convert_digest_endian(uint8_t *out) const;
 
 public:
 	// sha256digest
