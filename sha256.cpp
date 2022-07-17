@@ -1,7 +1,7 @@
 #include "sha256.h"
 
 // Typedefs to ease reading.
-typedef uint8_t u8;
+typedef uint8_t  u8;
 typedef uint32_t u32;
 typedef uint64_t u64;
 
@@ -41,68 +41,182 @@ static constexpr u32 INITIAL_HASH_VALUES[8] = {
 	0x5be0cd19U
 };
 
-u32 sha256digest::rrot(u32 l, u32 r) const
+bool sha256::digest::operator<(const sha256::digest &r) const
+{
+	for (u32 i = 0; i < sizeof(m_digest); ++i) {
+		if (m_digest.u8[i] >= r.m_digest.u8[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool sha256::digest::operator>(const sha256::digest &r) const
+{
+	for (u32 i = 0; i < sizeof(m_digest); ++i) {
+		if (m_digest.u8[i] <= r.m_digest.u8[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool sha256::digest::operator<=(const sha256::digest &r) const
+{
+	for (u32 i = 0; i < sizeof(m_digest); ++i) {
+		if (m_digest.u8[i] > r.m_digest.u8[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool sha256::digest::operator>=(const sha256::digest &r) const
+{
+	for (u32 i = 0; i < sizeof(m_digest); ++i) {
+		if (m_digest.u8[i] < r.m_digest.u8[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool sha256::digest::operator==(const sha256::digest &r) const
+{
+	for (u32 i = 0; i < sizeof(m_digest); ++i) {
+		if (m_digest.u8[i] != r.m_digest.u8[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool sha256::digest::operator!=(const sha256::digest &r) const
+{
+	for (u32 i = 0; i < sizeof(m_digest); ++i) {
+		if (m_digest.u8[i] == r.m_digest.u8[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+sha256::digest::operator const u8*( void ) const
+{
+	return m_digest.u8;
+}
+
+sha256::digest::operator u8*( void )
+{
+	return m_digest.u8;
+}
+
+char *sha256::digest::sprint_hex(char *out) const
+{
+	static constexpr char DIGITS[] = "0123456789abcdef";
+	for (u32 i = 0; i < sizeof(m_digest); ++i, out += 2) {
+		u8 b = m_digest.u8[i];
+		out[0] = DIGITS[b >> 4];
+		out[1] = DIGITS[b & 15];
+	}
+	return out;
+}
+
+char *sha256::digest::sprint_bin(char *out) const
+{
+	for (u32 byte = 0; byte < sizeof(m_digest); ++byte) {
+		for (u32 bit = 0; bit < CHAR_BIT; ++bit, ++out) {
+			out[0] = (m_digest.u8[byte]  & (1 << (CHAR_BIT - 1 - bit))) ? '1' : '0';
+		}
+	}
+	return out;
+}
+
+std::string sha256::digest::hex( void ) const
+{
+	static constexpr u64 SIZE = sizeof(m_digest) * 2;
+	char str[SIZE];
+	memset(str, 0, SIZE);
+	sprint_hex(str);
+	return std::string(str, size_t(SIZE));
+}
+
+std::string sha256::digest::bin( void ) const
+{
+	static constexpr u64 SIZE = sizeof(m_digest) * CHAR_BIT;
+	char str[SIZE];
+	memset(str, 0, SIZE);
+	sprint_bin(str);
+	return std::string(str, size_t(SIZE));
+}
+
+u32 sha256::rrot(u32 l, u32 r) const
 {
 	return (l >> r) | (l << (32 - r));
 }
 
-u32 sha256digest::zor(u32 a, u32 b, u32 c) const
+u32 sha256::zor(u32 a, u32 b, u32 c) const
 {
 	return a ^ b ^ c;
 }
 
-u32 sha256digest::sig(u32 x, u32 s1, u32 s2, u32 s3) const
+u32 sha256::sig(u32 x, u32 s1, u32 s2, u32 s3) const
 {
 	return zor(rrot(x, s1), rrot(x, s2), (x >> s3));
 }
 
-u32 sha256digest::SIG(u32 x, u32 s1, u32 s2, u32 s3) const
+u32 sha256::SIG(u32 x, u32 s1, u32 s2, u32 s3) const
 {
 	return zor(rrot(x, s1), rrot(x, s2), rrot(x, s3));
 }
 
-u32 sha256digest::sig0(u32 x) const
+u32 sha256::sig0(u32 x) const
 {
 	return sig(x, 7, 18, 3);
 }
 
-u32 sha256digest::sig1(u32 x) const
+u32 sha256::sig1(u32 x) const
 {
 	return sig(x, 17, 19, 10);
 }
 
-u32 sha256digest::SIG0(u32 x) const
+u32 sha256::SIG0(u32 x) const
 {
 	return SIG(x, 2, 13, 22);
 }
 
-u32 sha256digest::SIG1(u32 x) const
+u32 sha256::SIG1(u32 x) const
 {
 	return SIG(x, 6, 11, 25);
 }
 
-u32 sha256digest::choice(u32 x, u32 y, u32 z) const
+u32 sha256::choice(u32 x, u32 y, u32 z) const
 {
 	return (x & y) ^ ((~x) & z);
 }
 
-u32 sha256digest::majority(u32 x, u32 y, u32 z) const
+u32 sha256::majority(u32 x, u32 y, u32 z) const
 {
 	return (x & y) ^ (x & z) ^ (y & z);
 }
 
-void sha256digest::blit(const char *src, u8 *dst) const
+void sha256::blit(const u8 *src, u8 *dst) const
 {
 	memcpy(dst, src, BYTES_PER_BLOCK);
 }
 
-void sha256digest::blit(const char *src, u8 *dst, u32 num) const
+void sha256::blit(const u8 *src, u8 *dst, u32 num) const
 {
 	memcpy(dst, src, num);
 	memset(dst + num, 0, BYTES_PER_BLOCK - num);
 }
 
-void sha256digest::create_schedule(const u8 *block, schedule_t &schedule) const
+bool sha256::is_aligned(const void *mem) const
+{
+	return (reinterpret_cast<uintptr_t>(mem) & (sizeof(u32) - 1)) != 0;
+}
+
+void sha256::create_schedule(const u8 *block, schedule_t &schedule) const
 {
 	if (is_lil()) { // NOTE: On little endian machines we need to convert input data to big endian.
 		for (u32 i = 0, j = 0; i < 16; i++, j += 4) { // Split data in 32 bit blocks for the 16 first words
@@ -116,7 +230,7 @@ void sha256digest::create_schedule(const u8 *block, schedule_t &schedule) const
 	}
 }
 
-void sha256digest::process_block(const u8 *block, u32 *X) const
+void sha256::process_block(const u8 *block, u32 *X) const
 {
 	static constexpr schedule_t K = {
 		0x428a2f98U, 0x71374491U, 0xb5c0fbcfU, 0xe9b5dba5U,
@@ -163,145 +277,157 @@ void sha256digest::process_block(const u8 *block, u32 *X) const
 	}
 }
 
-const u8 *sha256digest::convert_digest_endian(u8 *out) const
+void sha256::process_final_blocks(u32 *X) const
 {
-	for (u32 i = 0; i < sizeof(m_digest); i += sizeof(u32)) {
-		for (u32 j = 0; j < sizeof(u32); ++j) {
-			out[i + 3 - j] = m_digest.u8[i + j];
-		}
-	}
-	return out;
-}
-
-sha256digest::sha256digest( void )
-{
-	for (u32 i = 0; i < WORDS_PER_DIGEST; ++i) {
-		m_digest.u32[i] = INITIAL_HASH_VALUES[i];
-	}
-}
-
-sha256digest::sha256digest(const char *message) : sha256digest(message, u64(strlen(message)))
-{}
-
-sha256digest::sha256digest(const char *message, u64 byte_count) : sha256digest()
-{
-	u32  block_data[WORDS_PER_BLOCK]; // NOTE: Store this originally as u32 to force the compiler to align the memory on word boundry.
-	u8  *block = (u8*)block_data;
-
-	// Compute padding.
-	const u64 ORIGINAL_MESSAGE_SIZE = byte_count;
-
-	// Process every 512-bit block, except for partial or last one.
-	if ((reinterpret_cast<const uintptr_t>(message) & (sizeof(u32) * CHAR_BIT - 1)) != 0) { // The message is not aligned so we need to bit block transfer it to an aligned block before processing (mainly to ensure functioning on ARM processors).
-		while (byte_count >= BYTES_PER_BLOCK) {
-			blit(message, block);
-			process_block(block, m_digest.u32);
-			message += BYTES_PER_BLOCK;
-			byte_count -= BYTES_PER_BLOCK;
-		}
-	} else { // The message is aligned so we can process it directly without aligning it manually.*/
-		const u8 *M = (const u8*)message;
-		constexpr u32 BLOCK_WORDSIZE = BYTES_PER_BLOCK / sizeof(u32);
-		while (byte_count >= BYTES_PER_BLOCK) {
-			process_block(M, m_digest.u32);
-			message += BYTES_PER_BLOCK;
-			byte_count -= BYTES_PER_BLOCK;
-			M += BLOCK_WORDSIZE;
-		}
-	}
-
-	// The last block always needs to be processed manually since it always contains message size.
-	blit(message, block, byte_count);
+	u64 byte_count = m_block_size;
+	union {
+		u32 w32[WORDS_PER_BLOCK];
+		u8  w8[BYTES_PER_BLOCK];
+	} block;
+	//u32 block_data[WORDS_PER_BLOCK];
+	//u8 *block = reinterpret_cast<u8*>(block_data);
 
 	// Store size (64 bits) of original message in bits at the end of the message
-	u32 padding_size = BYTES_PER_BLOCK - (ORIGINAL_MESSAGE_SIZE % BYTES_PER_BLOCK);
+	u32 padding_size = BYTES_PER_BLOCK - (m_message_size % BYTES_PER_BLOCK);
 	if (padding_size < sizeof(u64) + sizeof(u8)) { // Padding must at least fit a 64-bit number to denote message length in bits and one 8-bit number as a terminating 1-bit. If it does not, we add another block to process. Note that since we always work on bytes, not bits, the length of the terminating 1-bit is 8 bits, with a value of 0x80.
 		padding_size += BYTES_PER_BLOCK;
 	}
 
 	// The message will always be padded in some way. Add a first '1' to the padding.
-	block[byte_count] = PADDING_CONST;
+	memcpy(block.w8, m_block.u8, byte_count);
+	block.w8[byte_count] = PADDING_CONST;
+	memset(block.w8 + byte_count + 1, 0, BYTES_PER_BLOCK - (byte_count + 1));
 	byte_count += padding_size;
 
 	if (byte_count > BYTES_PER_BLOCK) { // Two blocks left to process.
-		process_block(block, m_digest.u32);
-		byte_count -= BYTES_PER_BLOCK;
-		memset(block, 0, BYTES_PER_BLOCK - sizeof(u64));
+		process_block(block.w8, X);
+		memset(block.w8, 0, BYTES_PER_BLOCK - sizeof(u64));
 	}
 
 	// One block left to process. Store message size in big endian format.
-	const u64 ORIGINAL_MESSAGE_BITSIZE = (ORIGINAL_MESSAGE_SIZE * CHAR_BIT);
+	const u64 ORIGINAL_MESSAGE_BITSIZE = (m_message_size * CHAR_BIT);
 	if (is_lil()) {
 		for (u32 i = 0; i < sizeof(u64); ++i) {
-			block[BYTES_PER_BLOCK - 1 - i] = reinterpret_cast<const 
+			block.w8[BYTES_PER_BLOCK - 1 - i] = reinterpret_cast<const
 			char*>(&ORIGINAL_MESSAGE_BITSIZE)[i];
 		}
 	} else {
 		for (u32 i = 0; i < sizeof(u64); ++i) {
-			block[BYTES_PER_BLOCK - sizeof(u64) + i] = reinterpret_cast<const char*>(&ORIGINAL_MESSAGE_BITSIZE)[i];
+			block.w8[BYTES_PER_BLOCK - sizeof(u64) + i] = reinterpret_cast<const char*>(&ORIGINAL_MESSAGE_BITSIZE)[i];
 		}
 	}
-	process_block(block, m_digest.u32);
-	byte_count -= BYTES_PER_BLOCK;
+	process_block(block.w8, X);
+}
 
+sha256::sha256( void ) : m_message_size(0), m_block_size(0)
+{
+	for (u32 i = 0; i < WORDS_PER_DIGEST; ++i) {
+		m_state.u32[i] = INITIAL_HASH_VALUES[i];
+	}
+	memset(m_block.u8, 0, BYTES_PER_BLOCK); // TODO: Remove this.
+}
+
+sha256::sha256(const char *message) : sha256()
+{
+	ingest(message);
+}
+
+sha256::sha256(const void *message, u64 byte_count) : sha256()
+{
+	ingest(message, byte_count);
+}
+
+sha256::~sha256( void )
+{
 	// Clear sensitive data.
-	memset(block, 0, BYTES_PER_BLOCK);
+	memset(m_block.u8, 0, sizeof(m_block.u8));
 }
 
-bool sha256digest::operator==(const sha256digest &r) const
+sha256 &sha256::operator()(const char *message)
 {
-	for (u32 i = 0; i < sizeof(m_digest) / sizeof(u32); ++i) {
-		if (m_digest.u32[i] != r.m_digest.u32[i]) {
-			return false;
+	ingest(message);
+	return *this;
+}
+
+sha256 &sha256::operator()(const void *message, u64 byte_count)
+{
+	ingest(message, byte_count);
+	return *this;
+}
+
+sha256 sha256::operator()(const char *message) const
+{
+	return sha256(*this)(message);
+}
+
+sha256 sha256::operator()(const void *message, u64 byte_count) const
+{
+	return sha256(*this)(message, byte_count);
+}
+
+void sha256::ingest(const char *message)
+{
+	ingest(message, strlen(message));
+}
+
+void sha256::ingest(const void *message, u64 byte_count)
+{	
+	const u8 *msg = reinterpret_cast<const u8*>(message);
+	m_message_size += byte_count;
+	while (byte_count > 0) {
+		u64 bytes_written = 0;
+		if (m_block_size == 0 && byte_count >= BYTES_PER_BLOCK && is_aligned(msg)) {
+			bytes_written = BYTES_PER_BLOCK;
+			process_block(msg, m_state.u32);
+		} else {
+			const u64 BYTES_REMAINING = BYTES_PER_BLOCK - m_block_size;
+			if (byte_count < BYTES_REMAINING) {
+				bytes_written = byte_count;
+				m_block_size += byte_count;
+				blit(msg, m_block.u8, bytes_written);
+			} else {
+				bytes_written = BYTES_REMAINING;
+				blit(msg, m_block.u8, bytes_written);
+				process_block(m_block.u8, m_state.u32);
+				m_block_size = 0;
+			}
 		}
+
+		msg += bytes_written;
+		byte_count -= bytes_written;
 	}
-	return true;
 }
 
-bool sha256digest::operator!=(const sha256digest &r) const
+sha256::digest sha256::get_digest( void ) const
 {
-	return !(*this == r);
-}
-
-// hex
-// Returns the SHA256 digest as a human-readable hex string.
-std::string sha256digest::hex( void ) const
-{
-	static constexpr char DIGITS[] = "0123456789abcdef";
-	std::string out;
-	out.resize(sizeof(m_digest) * 2);
-	u8 digest_data[sizeof(m_digest)];
-	const u8 *digest = is_lil() ? convert_digest_endian(digest_data) : m_digest.u8;
-	for (u32 i = 0; i < sizeof(m_digest); ++i) {
-		u8 b = digest[i];
-		out[i * 2]       = DIGITS[b >> 4];
-		out[(i * 2) + 1] = DIGITS[b & 15];
+	digest out;
+	memcpy(out.m_digest.u8, m_state.u8, BYTES_PER_DIGEST);
+	process_final_blocks(out.m_digest.u32);
+	if (is_lil()) { // Convert endianess if necessary - digests should always be in the same format no matter what
+		for (u32 i = 0; i < BYTES_PER_DIGEST; i += sizeof(u32)) {
+			for (u32 j = 0; j < sizeof(u32) >> 1; ++j) {
+				const u32 a = i + j;
+				const u32 b = i + sizeof(u32) - j - 1;
+				const u8 t = out.m_digest.u8[a];
+				out.m_digest.u8[a] = out.m_digest.u8[b];
+				out.m_digest.u8[b] = t;
+			}
+		}
 	}
 	return out;
 }
 
-// bin
-// Returns the SHA256 digest as a human-readable binary string.
-std::string sha256digest::bin( void ) const
+sha256::operator sha256::digest( void ) const
 {
-	std::string out;
-	out.resize(sizeof(m_digest) * BITS_PER_BYTE);
-	u8 digest_data[sizeof(m_digest)];
-	const u8 *digest = is_lil() ? convert_digest_endian(digest_data) : m_digest.u8;
-	for (u32 byte = 0; byte < sizeof(m_digest); ++byte) {
-		for (u32 bit = 0; bit < BITS_PER_BYTE; ++bit) {
-			out[byte * BITS_PER_BYTE + bit] = (digest[byte]  & (1 << (BITS_PER_BYTE - 1 - bit))) ? '1' : '0';
-		}
-	}
-	return out;
+	return get_digest();
 }
 
-std::string sha256(const char *message, u64 byte_count)
+std::string sha256hex(const void *message, u64 byte_count)
 {
-	return sha256digest(message, byte_count).hex();
+	return sha256(message, byte_count).get_digest().hex();
 }
 
-std::string sha256(const char *message)
+std::string sha256hex(const char *message)
 {
-	return sha256digest(message).hex();
+	return sha256(message).get_digest().hex();
 }

@@ -6,9 +6,7 @@
 #include <climits>
 #include <cstring>
 
-// sha256digest
-// The message digest using the SHA256 algorithm.
-class sha256digest
+class sha256
 {
 private:
 	// constants
@@ -25,11 +23,47 @@ private:
 	// typedefs
 	typedef uint32_t schedule_t[WORDS_PER_SCHEDULE];
 
+public:
+	// digest
+	// The output digest of data after SHA256 transformation.
+	class digest
+	{
+		friend class sha256;
+	private:
+		union {
+			uint8_t  u8[BYTES_PER_DIGEST];
+			uint32_t u32[WORDS_PER_DIGEST];
+		} m_digest;
+
+	public:
+		bool operator< (const digest &r) const;
+		bool operator> (const digest &r) const;
+		bool operator<=(const digest &r) const;
+		bool operator>=(const digest &r) const;
+		bool operator==(const digest &r) const;
+		bool operator!=(const digest &r) const;
+
+		operator const uint8_t*( void ) const;
+		operator uint8_t*( void );
+
+		char *sprint_hex(char *out) const;
+		char *sprint_bin(char *out) const;
+
+		std::string hex( void ) const;
+		std::string bin( void ) const;
+	};
+
 private:
 	union {
 		uint8_t  u8[BYTES_PER_DIGEST];
 		uint32_t u32[WORDS_PER_DIGEST];
-	} m_digest; // The message digest.
+	} m_state;
+	union {
+		uint8_t  u8[BYTES_PER_BLOCK];
+		uint32_t u32[WORDS_PER_BLOCK];
+	} m_block;
+	uint64_t m_message_size;
+	uint32_t m_block_size;
 
 private:
 	// rrot
@@ -64,59 +98,79 @@ private:
 	uint32_t majority(uint32_t x, uint32_t y, uint32_t z) const;
 	// blit
 	// Bit-block transfer of 64 bytes from 'src' to 'dst'.
-	void blit(const char *src, uint8_t *dst) const;
+	void blit(const uint8_t *src, uint8_t *dst) const;
 	// blit
 	// Bit-block transfer of 'num' bytes from 'src' to 'dst'. Fills remaining 64-'num' bytes in 'dst' with zero-value.
-	void blit(const char *src, uint8_t *dst, uint32_t num) const;
+	void blit(const uint8_t *src, uint8_t *dst, uint32_t num) const;
+	// is_aligned
+	// Checks if the memory is aligned to a 4-byte boundary.
+	bool is_aligned(const void *mem) const;
 	// create_schedule
 	// Fills a message schedule with the contents from 'block' and calculates the remaining 48 words in the schedule.
 	void create_schedule(const uint8_t *block, schedule_t &schedule) const;
 	// process_block
 	// Processes a single message data block and transforms the digest values in 'X'.
 	void process_block(const uint8_t *block, uint32_t *X) const;
-	// convert_digest_endian
-	// Converts bytes in digest to final endian and outputs them to 'digest'.
-	const uint8_t *convert_digest_endian(uint8_t *out) const;
+	// process_final_blocks
+	// Processes the remaining data in the block buffer so that a digest can be returned.
+	void process_final_blocks(uint32_t *X) const;
 
 public:
-	// sha256digest
+	// sha256
 	// Initialize digest to proper seed values.
-	sha256digest( void );
-	// sha256digest
-	// Create a message digest from the input message. Length is inferred from zero-terminator.
-	explicit sha256digest(const char *message);
-	// sha256digest
-	// Create a message digest from the input message. Explicit length.
-	sha256digest(const char *message, uint64_t byte_count);
+	sha256( void );
+	// sha256
+	// Ingest an initial message. Length is inferred from zero-terminator.
+	sha256(const char *message);
+	// sha256
+	// Ingest an initial message. Explicit length.
+	sha256(const void *message, uint64_t byte_count);
+	// ~sha256
+	// Clear out sensitive data.
+	~sha256( void );
 
-	// sha256digest
+	// sha256
 	// Default copy constructor.
-	sha256digest(const sha256digest&) = default;
+	sha256(const sha256&) = default;
 	// operator=
 	// Default assignment operator.
-	sha256digest &operator=(const sha256digest&) = default;
+	sha256 &operator=(const sha256&) = default;
 
-	// operator==
-	// Compares equality between digests.
-	bool operator==(const sha256digest &r) const;
-	// operator!=
-	// Compares inequality between digests.
-	bool operator!=(const sha256digest &r) const;
+	// operator()
+	// Ingest a message. Length is inferred from zero-terminator.
+	sha256 &operator()(const char *message);
+	// operator()
+	// Ingest a message. Explicit length.
+	sha256 &operator()(const void *message, uint64_t byte_count);
 
-	// hex
-	// Returns the digest as a human-readable hex string.
-	std::string hex( void ) const;
-	// bin
-	// Returns the digest as a human-readable binary string.
-	std::string bin( void ) const;
+	// operator() const
+	// Returns a copy of current state with ingested message. Length is inferred from zero-terminator.
+	sha256 operator()(const char *message) const;
+	// operator() const
+	// Returns a copy of current state with ingested message. Explicit length.
+	sha256 operator()(const void *message, uint64_t byte_count) const;
+
+	// ingest
+	// Ingest a message. Length is inferred from zero-terminator.
+	void ingest(const char *message);
+	// ingest
+	// Ingest a message. Explicit length.
+	void ingest(const void *message, uint64_t byte_count);
+
+	// get_digest
+	// Returns the digest of all ingested messages.
+	digest get_digest( void ) const;
+	// operator digest
+	// Implicitly converts state into digest of all ingested messages.
+	operator digest( void ) const;
 };
 
-// sha256
+// sha256hex
 // Returns the SHA256 digest of the input message as a human-readable hex string.
-std::string sha256(const char *message, uint64_t byte_count);
+std::string sha256hex(const void *message, uint64_t byte_count);
 
-// sha256
+// sha256hex
 // Returns the SHA256 digest of the input message as a human-readable hex string.
-std::string sha256(const char *input);
+std::string sha256hex(const char *input);
 
 #endif
