@@ -324,7 +324,6 @@ sha256::sha256( void ) : m_message_size(0), m_block_size(0)
 	for (u32 i = 0; i < WORDS_PER_DIGEST; ++i) {
 		m_state.u32[i] = INITIAL_HASH_VALUES[i];
 	}
-	memset(m_block.u8, 0, BYTES_PER_BLOCK); // TODO: Remove this.
 }
 
 sha256::sha256(const char *message) : sha256()
