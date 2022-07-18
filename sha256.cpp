@@ -41,109 +41,109 @@ static constexpr u32 INITIAL_HASH_VALUES[8] = {
 	0x5be0cd19U
 };
 
-bool sha256::digest::operator<(const sha256::digest &r) const
+bool sha256::sum::operator<(const sha256::sum &r) const
 {
-	for (u32 i = 0; i < sizeof(m_digest); ++i) {
-		if (m_digest.u8[i] >= r.m_digest.u8[i]) {
+	for (u32 i = 0; i < sizeof(m_sum); ++i) {
+		if (m_sum.u8[i] >= r.m_sum.u8[i]) {
 			return false;
 		}
 	}
 	return true;
 }
 
-bool sha256::digest::operator>(const sha256::digest &r) const
+bool sha256::sum::operator>(const sha256::sum &r) const
 {
-	for (u32 i = 0; i < sizeof(m_digest); ++i) {
-		if (m_digest.u8[i] <= r.m_digest.u8[i]) {
+	for (u32 i = 0; i < sizeof(m_sum); ++i) {
+		if (m_sum.u8[i] <= r.m_sum.u8[i]) {
 			return false;
 		}
 	}
 	return true;
 }
 
-bool sha256::digest::operator<=(const sha256::digest &r) const
+bool sha256::sum::operator<=(const sha256::sum &r) const
 {
-	for (u32 i = 0; i < sizeof(m_digest); ++i) {
-		if (m_digest.u8[i] > r.m_digest.u8[i]) {
+	for (u32 i = 0; i < sizeof(m_sum); ++i) {
+		if (m_sum.u8[i] > r.m_sum.u8[i]) {
 			return false;
 		}
 	}
 	return true;
 }
 
-bool sha256::digest::operator>=(const sha256::digest &r) const
+bool sha256::sum::operator>=(const sha256::sum &r) const
 {
-	for (u32 i = 0; i < sizeof(m_digest); ++i) {
-		if (m_digest.u8[i] < r.m_digest.u8[i]) {
+	for (u32 i = 0; i < sizeof(m_sum); ++i) {
+		if (m_sum.u8[i] < r.m_sum.u8[i]) {
 			return false;
 		}
 	}
 	return true;
 }
 
-bool sha256::digest::operator==(const sha256::digest &r) const
+bool sha256::sum::operator==(const sha256::sum &r) const
 {
-	for (u32 i = 0; i < sizeof(m_digest); ++i) {
-		if (m_digest.u8[i] != r.m_digest.u8[i]) {
+	for (u32 i = 0; i < sizeof(m_sum); ++i) {
+		if (m_sum.u8[i] != r.m_sum.u8[i]) {
 			return false;
 		}
 	}
 	return true;
 }
 
-bool sha256::digest::operator!=(const sha256::digest &r) const
+bool sha256::sum::operator!=(const sha256::sum &r) const
 {
-	for (u32 i = 0; i < sizeof(m_digest); ++i) {
-		if (m_digest.u8[i] == r.m_digest.u8[i]) {
+	for (u32 i = 0; i < sizeof(m_sum); ++i) {
+		if (m_sum.u8[i] == r.m_sum.u8[i]) {
 			return false;
 		}
 	}
 	return true;
 }
 
-sha256::digest::operator const u8*( void ) const
+sha256::sum::operator const u8*( void ) const
 {
-	return m_digest.u8;
+	return m_sum.u8;
 }
 
-sha256::digest::operator u8*( void )
+sha256::sum::operator u8*( void )
 {
-	return m_digest.u8;
+	return m_sum.u8;
 }
 
-char *sha256::digest::sprint_hex(char *out) const
+char *sha256::sum::sprint_hex(char *out) const
 {
 	static constexpr char DIGITS[] = "0123456789abcdef";
-	for (u32 i = 0; i < sizeof(m_digest); ++i, out += 2) {
-		u8 b = m_digest.u8[i];
+	for (u32 i = 0; i < sizeof(m_sum); ++i, out += 2) {
+		u8 b = m_sum.u8[i];
 		out[0] = DIGITS[b >> 4];
 		out[1] = DIGITS[b & 15];
 	}
 	return out;
 }
 
-char *sha256::digest::sprint_bin(char *out) const
+char *sha256::sum::sprint_bin(char *out) const
 {
-	for (u32 byte = 0; byte < sizeof(m_digest); ++byte) {
+	for (u32 byte = 0; byte < sizeof(m_sum); ++byte) {
 		for (u32 bit = 0; bit < CHAR_BIT; ++bit, ++out) {
-			out[0] = (m_digest.u8[byte]  & (1 << (CHAR_BIT - 1 - bit))) ? '1' : '0';
+			out[0] = (m_sum.u8[byte]  & (1 << (CHAR_BIT - 1 - bit))) ? '1' : '0';
 		}
 	}
 	return out;
 }
 
-std::string sha256::digest::hex( void ) const
+std::string sha256::sum::hex( void ) const
 {
-	static constexpr u64 SIZE = sizeof(m_digest) * 2;
+	static constexpr u64 SIZE = sizeof(m_sum) * 2;
 	char str[SIZE];
 	memset(str, 0, SIZE);
 	sprint_hex(str);
 	return std::string(str, size_t(SIZE));
 }
 
-std::string sha256::digest::bin( void ) const
+std::string sha256::sum::bin( void ) const
 {
-	static constexpr u64 SIZE = sizeof(m_digest) * CHAR_BIT;
+	static constexpr u64 SIZE = sizeof(m_sum) * CHAR_BIT;
 	char str[SIZE];
 	memset(str, 0, SIZE);
 	sprint_bin(str);
@@ -397,36 +397,36 @@ void sha256::ingest(const void *message, u64 byte_count)
 	}
 }
 
-sha256::digest sha256::get_digest( void ) const
+sha256::sum sha256::digest( void ) const
 {
-	digest out;
-	memcpy(out.m_digest.u8, m_state.u8, BYTES_PER_DIGEST);
-	process_final_blocks(out.m_digest.u32);
+	sum out;
+	memcpy(out.m_sum.u8, m_state.u8, BYTES_PER_DIGEST);
+	process_final_blocks(out.m_sum.u32);
 	if (is_lil()) { // Convert endianess if necessary - digests should always be in the same format no matter what
 		for (u32 i = 0; i < BYTES_PER_DIGEST; i += sizeof(u32)) {
 			for (u32 j = 0; j < sizeof(u32) >> 1; ++j) {
 				const u32 a = i + j;
 				const u32 b = i + sizeof(u32) - j - 1;
-				const u8 t = out.m_digest.u8[a];
-				out.m_digest.u8[a] = out.m_digest.u8[b];
-				out.m_digest.u8[b] = t;
+				const u8 t = out.m_sum.u8[a];
+				out.m_sum.u8[a] = out.m_sum.u8[b];
+				out.m_sum.u8[b] = t;
 			}
 		}
 	}
 	return out;
 }
 
-sha256::operator sha256::digest( void ) const
+sha256::operator sha256::sum( void ) const
 {
-	return get_digest();
+	return digest();
 }
 
 std::string sha256hex(const void *message, u64 byte_count)
 {
-	return sha256(message, byte_count).get_digest().hex();
+	return sha256(message, byte_count).digest().hex();
 }
 
 std::string sha256hex(const char *message)
 {
-	return sha256(message).get_digest().hex();
+	return sha256(message).digest().hex();
 }

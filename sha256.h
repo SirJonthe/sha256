@@ -6,11 +6,13 @@
 #include <climits>
 #include <cstring>
 
+// sha256
+// The main class used to ingest and process messages (on a byte basis) and eventually produce a digest (sum).
 class sha256
 {
 private:
 	// constants
-	static constexpr uint32_t BITS_PER_BYTE      = 8;
+	static constexpr uint32_t BITS_PER_BYTE      = CHAR_BIT;
 	static constexpr uint32_t BITS_PER_DIGEST    = 256;
 	static constexpr uint32_t BITS_PER_BLOCK     = 512;
 	static constexpr uint32_t BYTES_PER_DIGEST   = BITS_PER_DIGEST / BITS_PER_BYTE;
@@ -24,24 +26,24 @@ private:
 	typedef uint32_t schedule_t[WORDS_PER_SCHEDULE];
 
 public:
-	// digest
+	// sum
 	// The output digest of data after SHA256 transformation.
-	class digest
+	class sum
 	{
 		friend class sha256;
 	private:
 		union {
 			uint8_t  u8[BYTES_PER_DIGEST];
 			uint32_t u32[WORDS_PER_DIGEST];
-		} m_digest;
+		} m_sum;
 
 	public:
-		bool operator< (const digest &r) const;
-		bool operator> (const digest &r) const;
-		bool operator<=(const digest &r) const;
-		bool operator>=(const digest &r) const;
-		bool operator==(const digest &r) const;
-		bool operator!=(const digest &r) const;
+		bool operator< (const sum &r) const;
+		bool operator> (const sum &r) const;
+		bool operator<=(const sum &r) const;
+		bool operator>=(const sum &r) const;
+		bool operator==(const sum &r) const;
+		bool operator!=(const sum &r) const;
 
 		operator const uint8_t*( void ) const;
 		operator uint8_t*( void );
@@ -157,12 +159,12 @@ public:
 	// Ingest a message. Explicit length.
 	void ingest(const void *message, uint64_t byte_count);
 
-	// get_digest
+	// digest
 	// Returns the digest of all ingested messages.
-	digest get_digest( void ) const;
+	sum digest( void ) const;
 	// operator digest
 	// Implicitly converts state into digest of all ingested messages.
-	operator digest( void ) const;
+	operator sum( void ) const;
 };
 
 // sha256hex
