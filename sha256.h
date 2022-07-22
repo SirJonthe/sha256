@@ -195,7 +195,6 @@ public:
 // sha256hex
 // Returns the SHA256 digest of the input message as a human-readable hex string.
 std::string sha256hex(const char *message);
-
 // sha256hex
 // Returns the SHA256 digest of the input message as a human-readable hex string.
 std::string sha256hex(const void *message, uint64_t byte_count);
