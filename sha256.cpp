@@ -43,47 +43,41 @@ static constexpr u32 INITIAL_HASH_VALUES[8] = {
 
 bool sha256::sum::operator<(const sha256::sum &r) const
 {
-	for (u32 i = 0; i < sizeof(m_sum); ++i) {
-		if (m_sum.u8[i] >= r.m_sum.u8[i]) {
+	for (u32 i = 0; i < sizeof(m_sum.u8); ++i) {
+		if (m_sum.u8[i] < r.m_sum.u8[i]) {
+			return true;
+		} else if (m_sum.u8[i] > r.m_sum.u8[i]) {
 			return false;
 		}
 	}
-	return true;
+	return false;
 }
 
 bool sha256::sum::operator>(const sha256::sum &r) const
 {
-	for (u32 i = 0; i < sizeof(m_sum); ++i) {
-		if (m_sum.u8[i] <= r.m_sum.u8[i]) {
+	for (u32 i = 0; i < sizeof(m_sum.u8); ++i) {
+		if (m_sum.u8[i] > r.m_sum.u8[i]) {
+			return true;
+		} else if (m_sum.u8[i] < r.m_sum.u8[i]) {
 			return false;
 		}
 	}
-	return true;
+	return false;
 }
 
 bool sha256::sum::operator<=(const sha256::sum &r) const
 {
-	for (u32 i = 0; i < sizeof(m_sum); ++i) {
-		if (m_sum.u8[i] > r.m_sum.u8[i]) {
-			return false;
-		}
-	}
-	return true;
+	return (*this == r) || (*this < r);
 }
 
 bool sha256::sum::operator>=(const sha256::sum &r) const
 {
-	for (u32 i = 0; i < sizeof(m_sum); ++i) {
-		if (m_sum.u8[i] < r.m_sum.u8[i]) {
-			return false;
-		}
-	}
-	return true;
+	return (*this == r) || (*this > r);
 }
 
 bool sha256::sum::operator==(const sha256::sum &r) const
 {
-	for (u32 i = 0; i < sizeof(m_sum); ++i) {
+	for (u32 i = 0; i < sizeof(m_sum.u8); ++i) {
 		if (m_sum.u8[i] != r.m_sum.u8[i]) {
 			return false;
 		}
@@ -93,7 +87,7 @@ bool sha256::sum::operator==(const sha256::sum &r) const
 
 bool sha256::sum::operator!=(const sha256::sum &r) const
 {
-	for (u32 i = 0; i < sizeof(m_sum); ++i) {
+	for (u32 i = 0; i < sizeof(m_sum.u8); ++i) {
 		if (m_sum.u8[i] == r.m_sum.u8[i]) {
 			return false;
 		}
