@@ -33,36 +33,60 @@ public:
 		friend class sha256;
 	private:
 		union {
-			uint8_t  u8[BYTES_PER_DIGEST];
 			uint32_t u32[WORDS_PER_DIGEST];
+			uint8_t  u8[BYTES_PER_DIGEST];
 		} m_sum;
 
 	public:
+		// operator<
+		// Compares l < r.
 		bool operator< (const sum &r) const;
+		// operator>
+		// Compares l > r.
 		bool operator> (const sum &r) const;
+		// operator<=
+		// Compares l <= r.
 		bool operator<=(const sum &r) const;
+		// operator>=
+		// Compares l >= r.
 		bool operator>=(const sum &r) const;
+		// operator==
+		// Compares l == r.
 		bool operator==(const sum &r) const;
+		// operator!=
+		// Compares l != r.
 		bool operator!=(const sum &r) const;
 
+		// operator const uint8_t*
+		// Returns the bytes of the digest.
 		operator const uint8_t*( void ) const;
+		// operator uint8_t*
+		// Returns the bytes of the digest.
 		operator uint8_t*( void );
 
+		// sprint_hex
+		// Prints the digest into a human-readable hexadeximal format stored in 'out' and returns 'out' incremented by the number of characters written. 
 		char *sprint_hex(char *out) const;
+		// sprint_bin
+		// Prints the digest into a human-readable binary format stored in 'out' and returns 'out' incremented by the number of characters written.
 		char *sprint_bin(char *out) const;
 
+		// hex
+		// Returns the human-readable hexadecimal format of the digest.
 		std::string hex( void ) const;
+		// bin
+		// Returns the human-readable binary format of the digest.
 		std::string bin( void ) const;
 	};
 
 private:
 	union {
-		uint8_t  u8[BYTES_PER_DIGEST];
 		uint32_t u32[WORDS_PER_DIGEST];
+		uint8_t  u8[BYTES_PER_DIGEST];
 	} m_state;
 	union {
-		uint8_t  u8[BYTES_PER_BLOCK];
 		uint32_t u32[WORDS_PER_BLOCK];
+		uint8_t  u8[BYTES_PER_BLOCK];
 	} m_block;
 	uint64_t m_message_size;
 	uint32_t m_block_size;
@@ -173,6 +197,6 @@ std::string sha256hex(const void *message, uint64_t byte_count);
 
 // sha256hex
 // Returns the SHA256 digest of the input message as a human-readable hex string.
-std::string sha256hex(const char *input);
+std::string sha256hex(const char *message);
 
 #endif

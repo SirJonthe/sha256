@@ -415,12 +415,12 @@ sha256::operator sha256::sum( void ) const
 	return digest();
 }
 
-std::string sha256hex(const void *message, u64 byte_count)
-{
-	return sha256(message, byte_count).digest().hex();
-}
-
 std::string sha256hex(const char *message)
 {
 	return sha256(message).digest().hex();
+}
+
+std::string sha256hex(const void *message, u64 byte_count)
+{
+	return sha256(message, byte_count).digest().hex();
 }
