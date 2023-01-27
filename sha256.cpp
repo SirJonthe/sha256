@@ -1,3 +1,13 @@
+/// @file
+/// @author github.com/SirJonthe
+/// @date 2022
+/// @copyright Public domain. Derived from the U.S. NSA SHA256 Message-Digest Algorithm.
+/// @license BSD-3-Clause
+
+// THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+// IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
 #include "sha256.h"
 
 // Typedefs to ease reading.
@@ -16,15 +26,17 @@ constexpr union {
 	{ 1, 2, 3, 4 }
 };
 
-// is_big
-// Determines if the machine endian is big at run-time.
+/// Determines if the machine endian is big at run-time.
+///
+/// @returns a boolean indicating true if the machine is big endian, and false otherwise.
 bool is_big( void )
 {
 	return ENDIAN.word == 0x01020304;
 }
 
-// is_lil
 // Determines if the machine endian is little at run-time.
+///
+/// @returns a boolean indicating true if the machine is little endian, and false otherwise.
 bool is_lil( void )
 {
 	return ENDIAN.word == 0x4030201;

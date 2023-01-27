@@ -1,3 +1,13 @@
+/// @file
+/// @author github.com/SirJonthe
+/// @date 2022
+/// @copyright Public domain. Derived from the U.S. NSA SHA256 Message-Digest Algorithm.
+/// @license BSD-3-Clause
+
+// THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+// IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
 #ifndef SHA256_H_INCLUDED__
 #define SHA256_H_INCLUDED__
 
@@ -6,8 +16,8 @@
 #include <climits>
 #include <cstring>
 
-// sha256
-// The main class used to ingest and process messages (on a byte basis) and eventually produce a digest (sum).
+
+/// Processes messages of any length into a very unique identifyer with a length of 32 bytes. Functions by ingesting any number of messages via the 'ingest' function (alternatively via constructors and () operators) and finally outputting an SHA256 sum via the 'digest' function. New messages can be appended even after a digest has been generated.
 class sha256
 {
 private:
@@ -26,8 +36,7 @@ private:
 	typedef uint32_t schedule_t[WORDS_PER_SCHEDULE];
 
 public:
-	// sum
-	// The output digest of data after SHA256 transformation.
+	/// The output digest of data after SHA256 transformation.
 	class sum
 	{
 		friend class sha256;
@@ -38,44 +47,68 @@ public:
 		} m_sum;
 
 	public:
-		// operator<
-		// Compares l < r.
+		/// Compares l < r.
+		///
+		/// @param r the right-hand-side value to compare.
+		///
+		/// @returns the boolean result of the comparison
 		bool operator< (const sum &r) const;
-		// operator>
-		// Compares l > r.
+		/// Compares l > r.
+		///
+		/// @param r the right-hand-side value to compare.
+		///
+		/// @returns the boolean result of the comparison
 		bool operator> (const sum &r) const;
-		// operator<=
-		// Compares l <= r.
+		/// Compares l <= r.
+		///
+		/// @param r the right-hand-side value to compare.
+		///
+		/// @returns the boolean result of the comparison
 		bool operator<=(const sum &r) const;
-		// operator>=
-		// Compares l >= r.
+		/// Compares l >= r.
+		///
+		/// @param r the right-hand-side value to compare.
+		///
+		/// @returns the boolean result of the comparison
 		bool operator>=(const sum &r) const;
-		// operator==
-		// Compares l == r.
+		/// Compares l == r.
+		///
+		/// @param r the right-hand-side value to compare.
+		///
+		/// @returns the boolean result of the comparison
 		bool operator==(const sum &r) const;
-		// operator!=
-		// Compares l != r.
+		/// Compares l != r.
+		///
+		/// @param r the right-hand-side value to compare.
+		///
+		/// @returns the boolean result of the comparison
 		bool operator!=(const sum &r) const;
 
-		// operator const uint8_t*
-		// Returns the bytes of the digest.
+		/// Returns the bytes of the digest.
+		///
+		/// @returns the pointer to the bytes in the digest.
 		operator const uint8_t*( void ) const;
-		// operator uint8_t*
-		// Returns the bytes of the digest.
+		/// Returns the bytes of the digest.
+		///
+		/// @returns the pointer to the bytes in the digest.
 		operator uint8_t*( void );
 
-		// sprint_hex
-		// Prints the digest into a human-readable hexadeximal format stored in 'out' and returns 'out' incremented by the number of characters written. 
+		/// Prints the digest into a human-readable hexadeximal format stored in 'out' and returns 'out' incremented by the number of characters written. 
 		char *sprint_hex(char *out) const;
-		// sprint_bin
-		// Prints the digest into a human-readable binary format stored in 'out' and returns 'out' incremented by the number of characters written.
+		/// Prints the digest into a human-readable binary format stored in 'out' and returns 'out' incremented by the number of characters written.
 		char *sprint_bin(char *out) const;
 
-		// hex
-		// Returns the human-readable hexadecimal format of the digest.
+		/// Returns the human-readable hexadecimal format of the digest.
+		///
+		/// @param out the destination string of the print.
+		///
+		/// @returns the pointer to the location in the sprint at which printing stopped.
 		std::string hex( void ) const;
-		// bin
-		// Returns the human-readable binary format of the digest.
+		/// Returns the human-readable binary format of the digest.
+		///
+		/// @param out the destination string of the print.
+		///
+		/// @returns the pointer to the location in the sprint at which printing stopped.
 		std::string bin( void ) const;
 	};
 
@@ -92,111 +125,191 @@ private:
 	uint32_t m_block_size;
 
 private:
-	// rrot
-	// Returns a the right rotation of bits in 'l' by amount 'r'. Bits shifted out are shifted back in from the left.
+	/// Returns a the right rotation of bits in 'l' by amount 'r'. Bits shifted out are shifted back in from the left.
+	///
+	/// @param l the value to rotate.
+	/// @param r the number of iterations to rotate the value.
+	///
+	/// @returns the rotated bits.
 	uint32_t rrot(uint32_t l, uint32_t r) const;
-	// zor
-	// Exclusive-or between three values.
+	/// Exclusive-or between three values.
+	///
+	/// @param a a value.
+	/// @param b a value.
+	/// @param c a value.
+	///
+	/// @returns the zored value.
 	uint32_t zor(uint32_t a, uint32_t b, uint32_t c) const;
-	// sig
-	// Generic main lower case sigma function.
+	/// Generic main lower case sigma function.
+	///
+	/// @param x a value.
+	/// @param s1 the number of right rotations for the first step.
+	/// @param s2 the number of right rotations for the second step.
+	/// @param s3 the number of shifts for the third step.
+	///
+	/// @returns the lower case sigma.
 	uint32_t sig(uint32_t x, uint32_t s1, uint32_t s2, uint32_t s3) const;
-	// SIG
-	// Generic main upper case sigma function.
+	/// Generic main upper case sigma function.
+	///
+	/// @param x a value.
+	/// @param s1 the number of right rotations for the first step.
+	/// @param s2 the number of right rotations for the second step.
+	/// @param s3 the number of right rotations for the third step.
+	///
+	/// @returns the upper case sigma.
 	uint32_t SIG(uint32_t x, uint32_t s1, uint32_t s2, uint32_t s3) const;
-	// sig0
-	// Lower case sigma zero. Performs a transformation on one input value.
+	/// Lower case sigma zero. Performs a transformation on one input value.
+	///
+	/// @param x the value.
+	///
+	/// @returns the lower case sigma zero.
 	uint32_t sig0(uint32_t x) const;
-	// sig1
-	// Lower case sigma one. Performs a transformation on one input value.
+	/// Lower case sigma one. Performs a transformation on one input value.
+	///
+	/// @param x a value.
+	///
+	/// @returns the lower case sigma one.
 	uint32_t sig1(uint32_t x) const;
-	// SIG0
-	// Upper case sigma zero. Performs a transformation on one input value.
+	/// Upper case sigma zero. Performs a transformation on one input value.
+	///
+	/// @param x a value.
+	///
+	/// @returns the upper case sigma zero.
 	uint32_t SIG0(uint32_t x) const;
-	// SIG1
-	// Upper case sigma one. Performs a transformation on one input value.
+	/// Upper case sigma one. Performs a transformation on one input value.
+	///
+	/// @param x a value.
+	///
+	/// @returns the upper case sigma one.
 	uint32_t SIG1(uint32_t x) const;
-	// choice
-	// Returns a bit array where the result is picked between 'y' and 'z' using 'x' as boolean selector. 1 picks from 'y', 0 picks from 'z'.
+	/// Returns a bit array where the result is picked between 'y' and 'z' using 'x' as boolean selector. 1 picks from 'y', 0 picks from 'z'.
+	///
+	/// @param x a value.
+	/// @param y a value.
+	/// @param z a value.
+	///
+	/// @returns the choise bits.
 	uint32_t choice(uint32_t x, uint32_t y, uint32_t z) const;
-	// majority
-	// Returns a bit array where the result is equal to the majority bit value for a given bit position between 'x', 'y', and 'z'.
+	/// Returns a bit array where the result is equal to the majority bit value for a given bit position between 'x', 'y', and 'z'.
+	///
+	/// @param x a value.
+	/// @param y a value.
+	/// @param z a value.
+	///
+	/// @returns the majority bits.
 	uint32_t majority(uint32_t x, uint32_t y, uint32_t z) const;
-	// blit
-	// Bit-block transfer of 64 bytes from 'src' to 'dst'.
+	/// Bit-block transfer of 64 bytes from 'src' to 'dst'.
+	///
+	/// @param src the source to write.
+	/// @param dst the destination to write to.
 	void blit(const uint8_t *src, uint8_t *dst) const;
-	// blit
-	// Bit-block transfer of 'num' bytes from 'src' to 'dst'. Fills remaining 64-'num' bytes in 'dst' with zero-value.
+	/// Bit-block transfer of 'num' bytes from 'src' to 'dst'. Fills remaining 64-'num' bytes in 'dst' with zero-value.
+	///
+	/// @param src the source to write.
+	/// @param dst the destination to write to.
+	/// @param num the number of bytes to write.
 	void blit(const uint8_t *src, uint8_t *dst, uint32_t num) const;
-	// is_aligned
-	// Checks if the memory is aligned to a 4-byte boundary.
+	/// Checks if the memory is aligned to a 4-byte boundary.
+	///
+	/// @param mem the memory location to check for alignment.
+	///
+	/// @returns boolean indicating true if the memory is 4-byte aligned, and false elsewise.
 	bool is_aligned(const void *mem) const;
-	// create_schedule
-	// Fills a message schedule with the contents from 'block' and calculates the remaining 48 words in the schedule.
+	/// Fills a message schedule with the contents from 'block' and calculates the remaining 48 words in the schedule.
+	///
+	/// @param block the pointer to the block from which to create a schedule from.
+	/// @param schedule the destination of the output schedule.
 	void create_schedule(const uint8_t *block, schedule_t &schedule) const;
-	// process_block
-	// Processes a single message data block and transforms the digest values in 'X'.
+	/// Processes a single message data block and transforms the digest values in 'X'.
+	///
+	/// @param block the pointer to the block to process.
+	/// @param X the pointer to the digest to store the result of the process.
 	void process_block(const uint8_t *block, uint32_t *X) const;
-	// process_final_blocks
-	// Processes the remaining data in the block buffer so that a digest can be returned.
+	/// Processes the remaining data in the block buffer so that a digest can be returned.
+	///
+	/// @param X the pointer to the digest to store the result of the process.
 	void process_final_blocks(uint32_t *X) const;
 
 public:
-	// sha256
-	// Initialize digest to proper seed values.
+	/// Initialize digest to proper seed values.
 	sha256( void );
-	// sha256
-	// Ingest an initial message. Length is inferred from zero-terminator.
+	/// Ingest an initial message. Length is inferred from zero-terminator.
+	///
+	/// @param message pointer to a message to ingest.
 	sha256(const char *message);
-	// sha256
-	// Ingest an initial message. Explicit length.
+	/// Ingest an initial message. Explicit length.
+	///
+	/// @param message pointer to a message to ingest.
+	/// @param byte_count the number of bytes in the message to ingest.
 	sha256(const void *message, uint64_t byte_count);
-	// ~sha256
-	// Clear out sensitive data.
+	/// Clear out sensitive data.
 	~sha256( void );
 
-	// sha256
-	// Default copy constructor.
+	/// Default copy constructor.
 	sha256(const sha256&) = default;
-	// operator=
-	// Default assignment operator.
+	/// Default assignment operator.
 	sha256 &operator=(const sha256&) = default;
 
-	// operator()
-	// Ingest a message. Length is inferred from zero-terminator.
+	/// Ingest a message. Length is inferred from zero-terminator.
+	///
+	/// @param message pointer to a message to ingest.
+	///
+	/// @returns a reference to the modified data (self).
 	sha256 &operator()(const char *message);
-	// operator()
-	// Ingest a message. Explicit length.
+	/// Ingest a message. Explicit length.
+	///
+	/// @param message pointer to a message to ingest.
+	/// @param byte_count the number of bytes in the message to ingest.
+	///
+	/// @returns a reference to the modified data (self).
 	sha256 &operator()(const void *message, uint64_t byte_count);
 
-	// operator() const
-	// Returns a copy of current state with ingested message. Length is inferred from zero-terminator.
+	/// Returns a copy of current state with ingested message. Length is inferred from zero-terminator.
+	///
+	/// @param message pointer to the message to ingest.
+	///
+	/// @returns a modified sha256 incorporating the ingestion.
 	sha256 operator()(const char *message) const;
-	// operator() const
-	// Returns a copy of current state with ingested message. Explicit length.
+	/// Returns a copy of current state with ingested message. Explicit length.
+	///
+	/// @param message pointer to the message to ingest.
+	/// @param byte_count the number of bytes in the message to ingest.
+	///
+	/// @returns a modified sha256 incorporating the ingestion.
 	sha256 operator()(const void *message, uint64_t byte_count) const;
 
-	// ingest
-	// Ingest a message. Length is inferred from zero-terminator.
+	/// Ingest a message. Length is inferred from zero-terminator.
+	///
+	/// @param message pointer to a message to ingest.
 	void ingest(const char *message);
-	// ingest
-	// Ingest a message. Explicit length.
+	/// Ingest a message. Explicit length.
+	///
+	/// @param message pointer to a message to ingest.
+	/// @param byte_count the number of bytes in the message to ingest.
 	void ingest(const void *message, uint64_t byte_count);
 
-	// digest
-	// Returns the digest of all ingested messages.
+	/// Returns the digest of all ingested messages.
+	///
+	/// @returns the digest.
 	sum digest( void ) const;
-	// operator digest
-	// Implicitly converts state into digest of all ingested messages.
+	/// Implicitly converts state into digest of all ingested messages.
+	///
+	/// @returns the digest.
 	operator sum( void ) const;
 };
 
-
-// sha256hex
-// Returns the SHA256 digest of the input message as a human-readable hex string.
+/// Returns the SHA256 digest of the input message as a human-readable hex string.
+///
+/// @param message pointer to a message to ingest.
+///
+/// @returns a string containing the human-readable hexadecimal digest of the message.
 std::string sha256hex(const char *message);
-// sha256hex
-// Returns the SHA256 digest of the input message as a human-readable hex string.
+/// Returns the SHA256 digest of the input message as a human-readable hex string.
+///
+/// @param message pointer to a message to ingest.
+/// @param byte_count the number of bytes in the message to ingest.
+///
+/// @returns a string containing the human-readable hexadecimal digest of the message.
 std::string sha256hex(const void *message, uint64_t byte_count);
 
 #endif
